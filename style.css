@@ -3,3 +3,14 @@
 #editor{margin:14px 0;padding:12px;background:#eef6f0;border:1px solid #b7d4c0;border-radius:8px}#editor[hidden]{display:none}#editor label{display:block;font-size:11px;margin-top:8px}#editor textarea{margin:5px 0;width:100%;height:70px}#editor input{display:block;width:100%;min-width:0;border:1px solid #c5d6ca;border-radius:5px;padding:7px;font:inherit;background:white}#editor input[type=color]{height:34px;padding:3px}.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}#applyEdit{width:100%;margin-top:12px}#editor p{font-size:11px;line-height:1.6;color:#65776c}#editor [hidden]{display:none}@media(max-width:750px){#editor{max-width:480px}.edit-grid{grid-template-columns:repeat(3,1fr)}}
 
 .palette{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:12px 0}.swatch{background:var(--swatch);padding:0;height:27px;border:1px solid #999;border-radius:5px}.swatch:hover{background:var(--swatch);outline:2px solid #9bbcac}.swatch.active{outline:3px solid #24694f;outline-offset:2px}.settings{margin:10px 0}.line-presets{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}.line-presets span{width:100%;font-size:12px}.line-presets button{padding:7px 10px}.line-presets button.active{background:#cfe6d5}@media(max-width:750px){.palette{max-width:280px;display:inline-grid;width:280px;vertical-align:middle;margin-right:10px}.settings{display:inline-flex}}
+
+/* PDF/作業ファイルの開く・保存を用途別にまとめる */
+header{height:auto;min-height:86px;flex-wrap:wrap;padding-top:10px;padding-bottom:10px}.file-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.file-action-group{border:1px solid #d4ddd7;border-radius:10px;padding:6px 10px 9px;background:#f7faf8}.file-action-title{display:block;font-size:11px;font-weight:700;color:#496858;margin-bottom:5px}.file-action-buttons{display:flex;gap:7px;flex-wrap:wrap}.file-action-buttons button,.file-action-buttons label.open{padding:9px 12px;white-space:nowrap}.file-action-group:nth-child(2){background:#f3f6fb;border-color:#ccd9e8}.file-action-group:nth-child(2) .file-action-title{color:#345c85}@media(max-width:750px){header{padding:12px}.brand{width:100%}.file-actions{width:100%}.file-action-group{flex:1 1 260px}main{min-height:calc(100vh - 120px)}}
+
+.copy-actions{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.copy-actions button{flex:1;min-width:95px}.copy-help{font-size:12px;line-height:1.5;color:#53616a;margin:4px 0 12px}#newWindow{white-space:nowrap}
+
+#objectContextMenu{position:fixed;z-index:9999;min-width:230px;padding:5px;background:#fff;color:#18283a;border:1px solid #b9c5d0;border-radius:9px;box-shadow:0 8px 28px #0003}
+#objectContextMenu[hidden]{display:none}
+#objectContextMenu button{display:block;width:100%;text-align:left;border:0;background:transparent;color:inherit;padding:10px 12px;border-radius:5px;cursor:pointer;font-size:14px}
+#objectContextMenu button:hover:not(:disabled){background:#e9f3ff}
+#objectContextMenu button:disabled{opacity:.38;cursor:default}
