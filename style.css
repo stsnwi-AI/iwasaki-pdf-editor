@@ -40,3 +40,5 @@
 #status:empty{display:none}
 
 @media(max-width:1024px), (pointer:coarse){#annotationTools{display:none}.mobile-tools-open #annotationTools{display:block}aside>#undo{display:inline-flex;width:auto;min-height:44px;margin:0 0 9px 8px}#annotationTools>#tools{display:flex;overflow-x:auto}}
+
+.line-width-stepper{display:flex;align-items:stretch;gap:10px;max-width:100%}#editor #lineWidth{width:86px;text-align:center;font-size:22px!important;font-weight:700;appearance:textfield;-moz-appearance:textfield;background:#fff}#lineWidth::-webkit-inner-spin-button,#lineWidth::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}.line-width-buttons{display:flex;flex-direction:column;gap:6px}#editor .line-width-buttons button{min-width:60px;min-height:44px;padding:8px 16px;font-size:15px;background:#f3edfc;color:#67458f;border-color:#d9c9ea}.line-width-buttons button:disabled{opacity:.4}
