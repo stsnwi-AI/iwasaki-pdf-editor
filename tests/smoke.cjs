@@ -128,15 +128,20 @@ async function save(page, filename) {
     assert.equal(await touch.locator('#annotationTools').isVisible(), false);
     assert.equal(await touch.locator('#editTouch').getAttribute('aria-pressed'), 'false');
     await touch.click('#editTouch');
+    assert.equal(await touch.locator('#editor').isVisible(), false);
+    await touch.click('[data-tool=highlight]');
+    assert.equal(await touch.locator('#editor').isVisible(), false);
     await touch.fill('#text', 'スマホ検証');
     await touch.click('[data-tool="text"]');
     await touch.locator('#overlay').tap({ position: { x: 80, y: 120 } });
     assert.equal(await touch.evaluate(() => list().length), 1);
+    assert.equal(await touch.locator('#editor').isVisible(), false);
     // Existing annotations take priority over adding another text object.
     assert.equal(await touch.evaluate(() => tool), 'text');
     await touch.locator('#overlay').tap({ position: { x: 85, y: 125 } });
     assert.equal(await touch.evaluate(() => list().length), 1);
     assert.equal(await touch.evaluate(() => selected), 0);
+    assert.equal(await touch.locator('#editor').isVisible(), true);
     assert.equal(await touch.evaluate(() => tool), 'select');
     await touch.fill('#editText', 'スマホ検証・直接修正');
     await touch.click('#applyEdit');
@@ -210,6 +215,8 @@ async function save(page, filename) {
     for(let i=0;i<20;i++) await widths.click('#lineWidthUp');
     assert.equal(await widths.evaluate(() => list()[0].lineWidth), 10);
     assert.equal(await widths.locator('#lineWidthUp').isDisabled(), true);
+    await widths.click('[data-tool=highlight]');
+    assert.equal(await widths.locator('#editor').isVisible(), false);
     await widths.click('#undo');
     await waitIdle(widths);
     assert.equal(await widths.evaluate(() => list()[0].lineWidth), 9.5);
