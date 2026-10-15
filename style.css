@@ -38,3 +38,5 @@
 @media(max-width:1024px){.mobile-tools-open #editor:not([hidden]){display:block}#editor{margin:12px 0}.editor-heading{flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap}#editor #touchObjectActions:not([hidden]){grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 #status:empty{display:none}
+
+@media(max-width:1024px), (pointer:coarse){#annotationTools{display:none}.mobile-tools-open #annotationTools{display:block}aside>#undo{display:inline-flex;width:auto;min-height:44px;margin:0 0 9px 8px}#annotationTools>#tools{display:flex;overflow-x:auto}}
