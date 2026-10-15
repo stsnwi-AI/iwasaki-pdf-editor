@@ -122,6 +122,10 @@ async function save(page, filename) {
     assert.equal(await touch.evaluate(() => list().length), 1);
     await touch.click('[data-tool="select"]');
     await touch.locator('#overlay').tap({ position: { x: 85, y: 125 } });
+    assert.equal(await touch.locator('#editor #touchSelectionLabel').textContent(), '文字を選択中');
+    assert.equal(await touch.locator('#editor #selectionHelp').isVisible(), true);
+    assert.equal(await touch.locator('#editor #touchObjectActions').isVisible(), true);
+    assert.equal(await touch.locator('#editor').evaluate(e => e.scrollWidth <= e.clientWidth), true);
     assert.equal(await touch.locator('#editor #delete').isEnabled(), true);
     await touch.click('#delete');
     await touch.locator('#touchDeleteDialog').waitFor({ state: 'visible' });
