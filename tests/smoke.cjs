@@ -1,0 +1,133 @@
+const { chromium } = require('playwright');
+const assert = require('node:assert/strict');
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const url = process.env.PDF_EDITOR_URL || 'http://127.0.0.1:8000/';
+const waitIdle = page => page.waitForFunction(() => doc && !rendering && !pageBusy);
+const errors = [];
+function observe(page) {
+  page.on('pageerror', e => errors.push(e.message));
+  page.on('response', r => { if (r.status() >= 400 && r.url().startsWith(url)) errors.push(`${r.status()} ${r.url()}`); });
+}
+async function sample(page) {
+  observe(page);
+  await page.goto(url);
+  assert.equal(await page.title(), 'かんたんPDF編集');
+  await page.click('#sample');
+  await waitIdle(page);
+  assert.equal(await page.locator('#page').textContent(), '1 / 2');
+}
+async function save(page, filename) {
+  await page.click('#save');
+  await page.locator('#saveNameDialog').waitFor({ state: 'visible' });
+  const promise = page.waitForEvent('download');
+  await page.click('#confirmSaveName');
+  const download = await promise;
+  await download.saveAs(filename);
+  assert.equal(await download.failure(), null);
+  await waitIdle(page);
+}
+(async () => {
+  const executablePath = process.env.CHROMIUM_EXECUTABLE_PATH;
+  const browser = await chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
+  const output = path.resolve('test-results');
+  await fs.mkdir(output, { recursive: true });
+  try {
+    const context = await browser.newContext({ acceptDownloads: true });
+    // Exercise downloads consistently even on browsers with a native save picker.
+    await context.addInitScript(() => { window.showSaveFilePicker = undefined; });
+    const page = await context.newPage();
+    await sample(page);
+    await page.fill('#text', '開発環境の検証\n再編集');
+    await page.click('[data-tool="text"]');
+    await page.locator('#overlay').click({ position: { x: 100, y: 180 } });
+    assert.equal(await page.evaluate(() => list().length), 1);
+    const original = await page.evaluate(() => JSON.stringify(makeProject().sourcePDFs));
+    const annotations = await page.evaluate(() => JSON.stringify(items));
+    await page.click('#togglePages');
+    await page.locator('#pageGrid input').first().check();
+    await page.click('#rotatePages');
+    await waitIdle(page);
+    assert.equal(await page.evaluate(() => pageEntries[0].rotation), 90);
+    assert.equal(await page.evaluate(() => JSON.stringify(items)), annotations);
+    await page.click('#duplicatePages');
+    await waitIdle(page);
+    assert.equal(await page.evaluate(() => doc.numPages), 3);
+    assert.equal(await page.evaluate(() => items[pageEntries[1].id][0].text), '開発環境の検証\n再編集');
+    await page.click('#undo');
+    await waitIdle(page);
+    assert.equal(await page.evaluate(() => doc.numPages), 2);
+    await page.click('#undo');
+    await waitIdle(page);
+    assert.equal(await page.evaluate(() => pageEntries[0].rotation), 0);
+    await page.click('#save');
+    await page.locator('#saveNameDialog').waitFor({ state: 'visible' });
+    await page.click('#cancelSaveName');
+    assert.equal(await page.evaluate(() => dirty), true);
+    assert.equal(await page.evaluate(() => JSON.stringify(items)), annotations);
+    const first = path.join(output, 'edited.pdf');
+    await save(page, first);
+    const restored = await context.newPage();
+    observe(restored);
+    await restored.goto(url);
+    await restored.setInputFiles('#file', first);
+    await restored.waitForFunction(() => $('status').textContent.includes('編集情報を復元しました'));
+    await waitIdle(restored);
+    assert.equal(await restored.evaluate(() => JSON.stringify(items)), annotations);
+    assert.equal(await restored.evaluate(() => JSON.stringify(makeProject().sourcePDFs)), original);
+    const second = path.join(output, 'edited-again.pdf');
+    await save(restored, second);
+    const reopened = await context.newPage();
+    observe(reopened);
+    await reopened.goto(url);
+    await reopened.setInputFiles('#file', second);
+    await reopened.waitForFunction(() => $('status').textContent.includes('編集情報を復元しました'));
+    assert.equal(await reopened.evaluate(() => JSON.stringify(items)), annotations);
+    assert.equal(await reopened.evaluate(() => JSON.stringify(makeProject().sourcePDFs)), original);
+    await page.evaluate(async () => { await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready; });
+    await page.reload();
+    await page.waitForFunction(() => navigator.serviceWorker.controller);
+    const cachedAssets = await page.evaluate(async () => {
+      const names = (await caches.keys()).filter(n => n.startsWith('pdf-memo-'));
+      return (await (await caches.open(names[0])).keys()).length;
+    });
+    assert.ok(cachedAssets >= 30);
+    await context.setOffline(true);
+    await page.reload();
+    await page.click('#sample');
+    await waitIdle(page);
+    assert.equal(await page.evaluate(() => doc.numPages), 2);
+    await context.setOffline(false);
+    const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, acceptDownloads: true });
+    const touch = await mobile.newPage();
+    await sample(touch);
+    assert.equal(await touch.evaluate(() => touchMode), 'browse');
+    assert.equal(await touch.locator('#touchDelete').isDisabled(), true);
+    await touch.locator('#overlay').tap({ position: { x: 80, y: 120 } });
+    assert.equal(await touch.evaluate(() => list().length), 0);
+    await touch.click('#mobileToolsToggle');
+    await touch.fill('#text', 'スマホ検証');
+    await touch.click('[data-tool="text"]');
+    await touch.locator('#overlay').tap({ position: { x: 80, y: 120 } });
+    assert.equal(await touch.evaluate(() => list().length), 1);
+    await touch.click('[data-tool="select"]');
+    await touch.locator('#overlay').tap({ position: { x: 85, y: 125 } });
+    assert.equal(await touch.locator('#touchDelete').isEnabled(), true);
+    // Baseline 3.5.0 deletes immediately. This branch documents, rather than imports, 3.5.1.
+    await touch.click('#touchDelete');
+    assert.equal(await touch.evaluate(() => list().length), 0);
+    await touch.click('#undo');
+    await waitIdle(touch);
+    assert.equal(await touch.evaluate(() => list()[0].text), 'スマホ検証');
+    await touch.click('#prepareShare');
+    await touch.locator('#downloadShare').waitFor({ state: 'visible' });
+    const share = touch.waitForEvent('download');
+    await touch.click('#downloadShare');
+    const shared = await share;
+    await shared.saveAs(path.join(output, 'shared.pdf'));
+    assert.equal(await shared.failure(), null);
+    assert.equal(await touch.evaluate(async () => (await PDFLib.PDFDocument.load(await preparedMobileFile.arrayBuffer())).getPageCount()), 2);
+    assert.deepEqual(errors, []);
+    console.log(JSON.stringify({ pdfRoundTrip: true, repeatSave: true, originalSourcesPreserved: true, pageEdits: true, saveCancel: true, mobileBaseline: true, sharePdf: true, offlineSample: true, cachedAssets, browserErrors: errors }));
+  } finally { await browser.close(); }
+})().catch(e => { console.error(e); process.exitCode = 1; });
