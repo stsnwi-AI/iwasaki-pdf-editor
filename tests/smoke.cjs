@@ -14,7 +14,7 @@ async function sample(page) {
   await page.goto(url);
   assert.equal(await page.title(), 'かんたんPDF編集');
   await page.click('#sample');
-  await waitIdle(page);
+  await page.waitForFunction(() => $('page').textContent === '1 / 2' && !rendering && !pageBusy);
   assert.equal(await page.locator('#page').textContent(), '1 / 2');
 }
 async function save(page, filename) {
@@ -132,7 +132,15 @@ async function save(page, filename) {
     await touch.click('[data-tool="text"]');
     await touch.locator('#overlay').tap({ position: { x: 80, y: 120 } });
     assert.equal(await touch.evaluate(() => list().length), 1);
-    await touch.click('[data-tool="select"]');
+    // Existing annotations take priority over adding another text object.
+    assert.equal(await touch.evaluate(() => tool), 'text');
+    await touch.locator('#overlay').tap({ position: { x: 85, y: 125 } });
+    assert.equal(await touch.evaluate(() => list().length), 1);
+    assert.equal(await touch.evaluate(() => selected), 0);
+    assert.equal(await touch.evaluate(() => tool), 'select');
+    await touch.fill('#editText', 'スマホ検証・直接修正');
+    await touch.click('#applyEdit');
+    assert.equal(await touch.evaluate(() => list()[0].text), 'スマホ検証・直接修正');
     await touch.click('#browseTouch');
     const beforeReopen = await touch.evaluate(() => JSON.stringify(items));
     await touch.click('#editTouch');
@@ -171,7 +179,7 @@ async function save(page, filename) {
     assert.equal(await touch.evaluate(() => list().length), 0);
     await touch.click('#undo');
     await waitIdle(touch);
-    assert.equal(await touch.evaluate(() => list()[0].text), 'スマホ検証');
+    assert.equal(await touch.evaluate(() => list()[0].text), 'スマホ検証・直接修正');
     await touch.click('#prepareShare');
     await touch.locator('#downloadShare').waitFor({ state: 'visible' });
     const share = touch.waitForEvent('download');
