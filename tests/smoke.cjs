@@ -42,6 +42,14 @@ async function save(page, filename) {
     await page.click('[data-tool="text"]');
     await page.locator('#overlay').click({ position: { x: 100, y: 180 } });
     assert.equal(await page.evaluate(() => list().length), 1);
+    await page.click('[data-tool=select]');
+    await page.locator('#overlay').click({ position: { x: 105, y: 185 } });
+    assert.equal(await page.locator('#editor #delete').isEnabled(), true);
+    await page.click('#delete');
+    assert.equal(await page.evaluate(() => list().length), 0);
+    assert.equal(await page.locator('#touchDeleteDialog').isVisible(), false);
+    await page.click('#undo');
+    await waitIdle(page);
     const original = await page.evaluate(() => JSON.stringify(makeProject().sourcePDFs));
     const annotations = await page.evaluate(() => JSON.stringify(items));
     await page.click('#togglePages');
@@ -102,7 +110,9 @@ async function save(page, filename) {
     const touch = await mobile.newPage();
     await sample(touch);
     assert.equal(await touch.evaluate(() => touchMode), 'browse');
-    assert.equal(await touch.locator('#touchDelete').isDisabled(), true);
+    assert.equal(await touch.locator('#touchDelete').count(), 0);
+    assert.equal(await touch.locator('#delete').isVisible(), false);
+    assert.equal(await touch.locator('[data-tool=select]').textContent(), '選択・移動・削除');
     await touch.locator('#overlay').tap({ position: { x: 80, y: 120 } });
     assert.equal(await touch.evaluate(() => list().length), 0);
     await touch.click('#mobileToolsToggle');
@@ -112,9 +122,17 @@ async function save(page, filename) {
     assert.equal(await touch.evaluate(() => list().length), 1);
     await touch.click('[data-tool="select"]');
     await touch.locator('#overlay').tap({ position: { x: 85, y: 125 } });
-    assert.equal(await touch.locator('#touchDelete').isEnabled(), true);
-    // Baseline 3.5.0 deletes immediately. This branch documents, rather than imports, 3.5.1.
-    await touch.click('#touchDelete');
+    assert.equal(await touch.locator('#editor #delete').isEnabled(), true);
+    await touch.click('#delete');
+    await touch.locator('#touchDeleteDialog').waitFor({ state: 'visible' });
+    assert.equal(await touch.evaluate(() => list().length), 1);
+    await touch.click('#cancelTouchDelete');
+    assert.equal(await touch.evaluate(() => list().length), 1);
+    await touch.click('#delete');
+    await touch.click('#confirmTouchDelete');
+    assert.equal(await touch.evaluate(() => touchMode), 'browse');
+    assert.equal(await touch.locator('#delete').isVisible(), false);
+    await touch.evaluate(() => $('confirmTouchDelete').click());
     assert.equal(await touch.evaluate(() => list().length), 0);
     await touch.click('#undo');
     await waitIdle(touch);
@@ -128,6 +146,6 @@ async function save(page, filename) {
     assert.equal(await shared.failure(), null);
     assert.equal(await touch.evaluate(async () => (await PDFLib.PDFDocument.load(await preparedMobileFile.arrayBuffer())).getPageCount()), 2);
     assert.deepEqual(errors, []);
-    console.log(JSON.stringify({ pdfRoundTrip: true, repeatSave: true, originalSourcesPreserved: true, pageEdits: true, saveCancel: true, mobileBaseline: true, sharePdf: true, offlineSample: true, cachedAssets, browserErrors: errors }));
+    console.log(JSON.stringify({ pdfRoundTrip: true, repeatSave: true, originalSourcesPreserved: true, pageEdits: true, saveCancel: true, mobileConfirmedDelete: true, sharePdf: true, offlineSample: true, cachedAssets, browserErrors: errors }));
   } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });
