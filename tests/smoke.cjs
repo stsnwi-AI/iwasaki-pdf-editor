@@ -74,6 +74,8 @@ async function save(page, filename) {
     await page.locator('#overlay').click({button:'right', position:{x:105,y:185}});
     await page.click('#editObject');
     assert.equal(await page.locator('#editText').evaluate(el=>el===document.activeElement),true);
+    await page.locator('#overlay').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(100);
     await page.locator('#overlay').click({button:'right', position:{x:105,y:185}});
     await page.click('#removeObject');
     assert.equal(await page.evaluate(() => list().length), 0);
@@ -91,7 +93,7 @@ async function save(page, filename) {
     await page.click('#duplicatePages');
     await waitIdle(page);
     assert.equal(await page.evaluate(() => doc.numPages), 3);
-    assert.equal(await page.evaluate(() => items[pageEntries[1].id][0].text), '開発環境の検証\n再編集');
+    assert.equal(await page.evaluate(() => items[pageEntries[1].id][0].text), '書き換えた指示メモ\n日本語の再編集');
     await page.click('#undo');
     await waitIdle(page);
     assert.equal(await page.evaluate(() => doc.numPages), 2);
