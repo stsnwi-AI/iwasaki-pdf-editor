@@ -46,17 +46,23 @@ async function save(page, filename) {
     await page.click('[data-tool="text"]');
     await page.locator('#overlay').click({ position: { x: 100, y: 180 } });
     assert.equal(await page.evaluate(() => list().length), 1);
-    await page.click('[data-tool=select]');
+    // Clicking existing text while the text tool is active opens its editor.
     await page.locator('#overlay').click({ position: { x: 105, y: 185 } });
     assert.equal(await page.locator('#editor #delete').isEnabled(), true);
-    assert.deepEqual(await page.evaluate(() => textStyleControls('edit')), {fontFamily:'yuMincho',bold:true,italic:true});
-    await page.selectOption('#editFont', 'meiryo');
-    await page.click('#editBold');
+    assert.equal(await page.evaluate(() => tool), 'select');
+    assert.equal(await page.evaluate(() => list().length), 1);
+    await page.fill('#editText', '書き換えた指示メモ\n日本語の再編集');
+    assert.equal(await page.evaluate(() => list()[selected].text), '書き換えた指示メモ\n日本語の再編集');
+    await page.selectOption('#size', '36');
+    assert.equal(await page.evaluate(() => list()[selected].size), 36);
+    assert.deepEqual(await page.evaluate(() => textStyleControls('text')), {fontFamily:'yuMincho',bold:true,italic:true});
+    await page.selectOption('#textFont', 'meiryo');
+    await page.click('#textBold');
     assert.deepEqual(await page.evaluate(() => ({fontFamily:list()[selected].fontFamily,bold:list()[selected].bold,italic:list()[selected].italic})), {fontFamily:'meiryo',bold:false,italic:true});
     await page.click('#undo');
     await waitIdle(page);
     await page.locator('#overlay').click({ position: { x: 105, y: 185 } });
-    assert.equal(await page.locator('#editBold').getAttribute('aria-pressed'), 'true');
+    assert.equal(await page.locator('#textBold').getAttribute('aria-pressed'), 'true');
     await page.click('#delete');
     assert.equal(await page.evaluate(() => list().length), 0);
     assert.equal(await page.locator('#touchDeleteDialog').isVisible(), false);
