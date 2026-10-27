@@ -45,3 +45,4 @@ $('touchDeleteDialog').addEventListener('cancel',e=>{e.preventDefault();cancelTo
 $('confirmTouchDelete').onclick=()=>{const target=pendingTouchDelete;pendingTouchDelete=null;$('touchDeleteDialog').close();if(!target||pageBusy||rendering||pageEntries[page-1]?.id!==target.id){window.updateTouchSelection();return}const indices=target.objects.map(o=>list().indexOf(o));if(indices.some(i=>i<0)){say('選択が変わったため削除しませんでした。');window.updateTouchSelection();return}selectIndices(indices);removeSelectedObjects();working=start=dragHandle=dragGroup=null;setTouchMode('browse',false);draw();say(target.objects.length+'件を削除しました。削除はOFFです。「元に戻す」で復元できます。')};
 const desktopDeleteObject=$('delete').onclick;$('delete').onclick=()=>mobileMedia.matches?requestTouchDelete():desktopDeleteObject();
 const desktopContextDelete=$('removeObject').onclick;$('removeObject').onclick=()=>{if(mobileMedia.matches){hideObjectMenu();requestTouchDelete()}else desktopContextDelete()};
+

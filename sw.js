@@ -3,3 +3,4 @@ const APP_FILES=["./", "index.html", "style.css", "app.js", "mobile.js", "manife
 self.addEventListener('install',e=>{e.waitUntil(caches.open(APP_CACHE).then(c=>c.addAll(APP_FILES))) });
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('pdf-memo-')&&k!==APP_CACHE).map(k=>caches.delete(k)))) )});
 self.addEventListener('fetch',e=>{const url=new URL(e.request.url);const scope=new URL(self.registration.scope);if(e.request.method!=='GET'||url.origin!==scope.origin||!url.pathname.startsWith(scope.pathname))return;const path=url.pathname.slice(scope.pathname.length);if(!APP_FILES.includes(path)&&path!=='')return;e.respondWith(fetch(e.request).then(res=>{if(res.ok){const copy=res.clone();caches.open(APP_CACHE).then(cache=>cache.put(e.request,copy)).catch(()=>{})}return res}).catch(()=>caches.match(e.request,{ignoreSearch:true}).then(res=>res||Promise.reject(new Error('Offline asset unavailable')))))});
+

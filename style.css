@@ -48,3 +48,4 @@
 .settings{display:block}.text-size-label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}.text-size-stepper{display:flex;gap:8px;align-items:center}.text-size-stepper input{width:100%;min-width:0;min-height:44px;text-align:center;font-size:18px}.text-size-stepper button{flex:0 0 44px;min-height:44px;font-size:20px}
 
 .text-style-controls{grid-template-columns:minmax(0,1fr) 56px 56px;gap:6px;align-items:end}.text-style-controls>label{min-width:0;grid-column:1;grid-row:1}.text-style-controls select{min-width:0;font-size:12px;padding:6px;min-height:44px}.text-style-controls>small{grid-column:1/-1;grid-row:2;font-size:10px;line-height:1.4}.text-style-buttons{display:contents}.text-style-buttons button{min-width:0;width:56px;padding:6px 2px;font-size:12px;white-space:nowrap;grid-row:1}.text-style-buttons button:first-child{grid-column:2}.text-style-buttons button:last-child{grid-column:3}
+
