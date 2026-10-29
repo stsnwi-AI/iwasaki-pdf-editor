@@ -60,3 +60,5 @@
 #stampBox{margin-top:12px;padding:10px;border-top:1px solid #ddd}#stampBox h2{font-size:14px}.stamp-buttons{display:grid;grid-template-columns:1fr 1fr;gap:6px}#stampBox button{min-height:44px}#stampBox label{display:inline-flex;gap:8px;margin:8px 0}#lineStyleDialog{width:min(420px,90vw);padding:22px;border:0;border-radius:14px}#lineStyleDialog::backdrop{background:#0006}#lineStyleDialog label{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0}#lineStyleDialog select{min-height:44px;max-width:230px}#lineStyleDialog button{min-height:44px}.line-dialog-actions{display:flex;justify-content:flex-end;gap:12px}#lineStyleDialog p{font-size:13px;color:#555}
 
 #stampBox .seal-preview{border:4px double #b83333;color:#b83333;background:#fffaf7;font-family:serif;font-weight:bold;letter-spacing:.14em;border-radius:3px;min-height:46px}#stampBox h2::after{content:"（枠付き）";font-size:11px;font-weight:normal}
+
+#lineStyleDialog{max-height:85vh;overflow-y:auto}#lineStyleDialog input[type=number]{width:85px;min-height:40px}#lineStyleDialog input[type=color]{width:65px;min-height:40px}
