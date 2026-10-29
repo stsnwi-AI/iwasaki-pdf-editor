@@ -62,3 +62,5 @@
 #stampBox .seal-preview{border:4px double #b83333;color:#b83333;background:#fffaf7;font-family:serif;font-weight:bold;letter-spacing:.14em;border-radius:3px;min-height:46px}#stampBox h2::after{content:"（枠付き）";font-size:11px;font-weight:normal}
 
 #lineStyleDialog{max-height:85vh;overflow-y:auto}#lineStyleDialog input[type=number]{width:85px;min-height:40px}#lineStyleDialog input[type=color]{width:65px;min-height:40px}
+
+#lineStyleDialog label[hidden],#lineStyleDialog input[hidden]{display:none!important}
