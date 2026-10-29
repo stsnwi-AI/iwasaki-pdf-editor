@@ -64,3 +64,5 @@
 #lineStyleDialog{max-height:85vh;overflow-y:auto}#lineStyleDialog input[type=number]{width:85px;min-height:40px}#lineStyleDialog input[type=color]{width:65px;min-height:40px}
 
 #lineStyleDialog label[hidden],#lineStyleDialog input[hidden]{display:none!important}
+
+#lineStyleDialog{box-sizing:border-box;max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);box-shadow:0 8px 35px #0005}#lineStyleDialog::backdrop{background:transparent}#lineStyleDialog h2{cursor:move;touch-action:none;user-select:none;position:sticky;top:-22px;background:#f2eef8;padding:14px;margin:-22px -22px 16px;font-size:17px;border-bottom:1px solid #d7cbe8}#lineStyleDialog h2:focus-visible{outline:2px solid #705398;outline-offset:-3px}

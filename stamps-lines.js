@@ -20,7 +20,7 @@ function openLineStyle(){
  $('applyStrokeColor').checked=false;$('strokeColorChoice').value=lineTargets[0].color||'#e59a19';const opacity=common(lineTargets,'opacity',1);$('objectOpacityChoice').value=opacity===''?'':Math.round(opacity*100);const shapes=lineTargets.filter(o=>['rect','ellipse'].includes(o.type));$('fillChoices').hidden=!shapes.length;$('fillModeChoice').value='keep';$('fillColorChoice').value=shapes[0]?.fillColor||'#ffffff';const fillAlpha=common(shapes,'fillOpacity',1);$('fillOpacityChoice').value=fillAlpha===''||fillAlpha===undefined?'':Math.round(fillAlpha*100);$('lineStyleChoice').value=common(lineTargets,'lineStyle','solid');const arrows=lineTargets.filter(o=>o.type==='arrow');
  $('capChoices').hidden=!arrows.length;$('capHint').hidden=!arrows.length;
  $('startCapChoice').value=common(arrows,'startCap','none');$('endCapChoice').value=common(arrows,'endCap','arrow');
- hideObjectMenu();lineDialog.showModal();
+ hideObjectMenu();lineDialog.showModal();placeEditWindow();
 }
 const lineMenuButton=document.createElement('button');lineMenuButton.textContent='線・背景・透明度を編集';lineMenuButton.setAttribute('role','menuitem');lineMenuButton.onclick=openLineStyle;$('objectMenu').append(lineMenuButton);
 const lineTouchButton=document.createElement('button');lineTouchButton.textContent='線・背景・透明度';lineTouchButton.onclick=openLineStyle;$('touchObjectActions').append(lineTouchButton);
@@ -40,3 +40,15 @@ $('applyLineStyle').onclick=()=>{
 };
 
 $('strokeColorChoice').oninput=()=>{$('applyStrokeColor').checked=true};$('fillColorChoice').oninput=()=>{$('fillModeChoice').value='color'};
+
+// Move only from the title; editing controls retain their usual pointer behavior.
+const editWindowTitle=lineDialog.querySelector('h2');editWindowTitle.tabIndex=0;editWindowTitle.title='ドラッグで移動。キーボードは矢印キーで移動。';editWindowTitle.setAttribute('aria-label','編集ウィンドウを移動');
+let editWindowPosition=null,editWindowDrag=null;
+function clampEditWindow(x,y,w,h,vw=window.innerWidth,vh=window.innerHeight){return{x:Math.max(0,Math.min(x,Math.max(0,vw-w))),y:Math.max(0,Math.min(y,Math.max(0,vh-h)))}}
+function placeEditWindow(x,y){if(!lineDialog.open)return;const r=lineDialog.getBoundingClientRect();const point=clampEditWindow(x??editWindowPosition?.x??r.left,y??editWindowPosition?.y??r.top,r.width,r.height);editWindowPosition=point;Object.assign(lineDialog.style,{position:'fixed',margin:'0',left:point.x+'px',top:point.y+'px',right:'auto',bottom:'auto'})}
+editWindowTitle.onpointerdown=e=>{if(e.button!==0)return;e.preventDefault();const r=lineDialog.getBoundingClientRect();editWindowDrag={id:e.pointerId,x:e.clientX,y:e.clientY,left:r.left,top:r.top};editWindowTitle.setPointerCapture(e.pointerId)};
+editWindowTitle.onpointermove=e=>{if(editWindowDrag?.id!==e.pointerId)return;e.preventDefault();placeEditWindow(editWindowDrag.left+e.clientX-editWindowDrag.x,editWindowDrag.top+e.clientY-editWindowDrag.y)};
+function stopEditWindowDrag(e){if(editWindowDrag?.id!==e.pointerId)return;editWindowDrag=null;if(editWindowTitle.hasPointerCapture(e.pointerId))editWindowTitle.releasePointerCapture(e.pointerId)}
+editWindowTitle.onpointerup=stopEditWindowDrag;editWindowTitle.onpointercancel=stopEditWindowDrag;editWindowTitle.onlostpointercapture=()=>{editWindowDrag=null};
+editWindowTitle.onkeydown=e=>{const n=e.shiftKey?30:10,d={ArrowLeft:[-n,0],ArrowRight:[n,0],ArrowUp:[0,-n],ArrowDown:[0,n]}[e.key];if(d){e.preventDefault();e.stopPropagation();const r=lineDialog.getBoundingClientRect();placeEditWindow(r.left+d[0],r.top+d[1])}};
+window.addEventListener('resize',()=>placeEditWindow());lineDialog.addEventListener('close',()=>{editWindowDrag=null});
