@@ -8,7 +8,7 @@ for(const text of ['要修正','位置確認','施工済','写真撮影']){const
 for(let n=1;n<=20;n++){const o=document.createElement('option');o.value=String.fromCharCode(0x2460+n-1);o.textContent=o.value;$('stampNumber').append(o)}
 $('placeNumber').onclick=()=>prepareStamp(String($('stampNumber').selectedIndex+1),true);
 const lineDialog=document.createElement('dialog');lineDialog.id='lineStyleDialog';
-lineDialog.innerHTML='<h2>線・先端を編集</h2><p>選択した線・図形にまとめて反映します。</p><label>線種<select id="lineStyleChoice"><option value="">変更しない／混在</option><option value="solid">実線 ─</option><option value="dashed">破線 ┄</option><option value="dotted">点線 ⋯</option></select></label><div id="capChoices"><label>始点<select id="startCapChoice"></select></label><label>終点<select id="endCapChoice"></select></label></div><p id="capHint">先端の変更は矢印オブジェクトに適用します。「なし」で通常の直線になります。</p><div class="line-dialog-actions"><button id="cancelLineStyle">キャンセル</button><button id="applyLineStyle">反映</button></div>';
+lineDialog.innerHTML='<h2>線・背景・透明度を編集</h2><p>選択した線・図形にまとめて反映します。</p><label>線の色 <input id="applyStrokeColor" type="checkbox" aria-label="線色を変更"><input id="strokeColorChoice" type="color" value="#e59a19"></label><label>不透明度（全体）<input id="objectOpacityChoice" type="number" min="0" max="100" step="1" aria-label="全体の不透明度パーセント"></label><div id="fillChoices"><label>背景の塗りつぶし<select id="fillModeChoice"><option value="keep">変更しない</option><option value="none">なし（透明）</option><option value="color">色を指定</option></select></label><label>背景色<input id="fillColorChoice" type="color" value="#ffffff"></label><label>背景の不透明度<input id="fillOpacityChoice" type="number" min="0" max="100" step="1" aria-label="背景の不透明度パーセント"></label></div><p>不透明度：0%で透明、100%で不透明。</p><label>線種<select id="lineStyleChoice"><option value="">変更しない／混在</option><option value="solid">実線 ─</option><option value="dashed">破線 ┄</option><option value="dotted">点線 ⋯</option></select></label><div id="capChoices"><label>始点<select id="startCapChoice"></select></label><label>終点<select id="endCapChoice"></select></label></div><p id="capHint">先端の変更は矢印オブジェクトに適用します。「なし」で通常の直線になります。</p><div class="line-dialog-actions"><button id="cancelLineStyle">キャンセル</button><button id="applyLineStyle">反映</button></div>';
 document.body.append(lineDialog);
 for(const id of ['startCapChoice','endCapChoice'])for(const [value,label] of [['','変更しない／混在'],['none','なし'],['arrow','矢印 →'],['circle','丸 ●']]){const o=document.createElement('option');o.value=value;o.textContent=label;$(id).append(o)}
 const lineTypes=['pen','rect','ellipse','arrow'];let lineTargets=null,linePage=null;
@@ -16,21 +16,27 @@ function openLineStyle(){
  if(pageBusy||rendering||start||working)return;
  lineTargets=selectedObjects().filter(o=>lineTypes.includes(o.type));if(!lineTargets.length)return;
  linePage=pageEntries[page-1].id;
- const common=(objects,key,fallback)=>{const values=objects.map(o=>o[key]||fallback);return values.every(v=>v===values[0])?values[0]:''};
- $('lineStyleChoice').value=common(lineTargets,'lineStyle','solid');const arrows=lineTargets.filter(o=>o.type==='arrow');
+ const common=(objects,key,fallback)=>{const values=objects.map(o=>o[key]??fallback);return values.every(v=>v===values[0])?values[0]:''};
+ $('applyStrokeColor').checked=false;$('strokeColorChoice').value=lineTargets[0].color||'#e59a19';const opacity=common(lineTargets,'opacity',1);$('objectOpacityChoice').value=opacity===''?'':Math.round(opacity*100);const shapes=lineTargets.filter(o=>['rect','ellipse'].includes(o.type));$('fillChoices').hidden=!shapes.length;$('fillModeChoice').value='keep';$('fillColorChoice').value=shapes[0]?.fillColor||'#ffffff';const fillAlpha=common(shapes,'fillOpacity',1);$('fillOpacityChoice').value=fillAlpha===''||fillAlpha===undefined?'':Math.round(fillAlpha*100);$('lineStyleChoice').value=common(lineTargets,'lineStyle','solid');const arrows=lineTargets.filter(o=>o.type==='arrow');
  $('capChoices').hidden=!arrows.length;$('capHint').hidden=!arrows.length;
  $('startCapChoice').value=common(arrows,'startCap','none');$('endCapChoice').value=common(arrows,'endCap','arrow');
  hideObjectMenu();lineDialog.showModal();
 }
-const lineMenuButton=document.createElement('button');lineMenuButton.textContent='線種・先端を編集';lineMenuButton.setAttribute('role','menuitem');lineMenuButton.onclick=openLineStyle;$('objectMenu').append(lineMenuButton);
-const lineTouchButton=document.createElement('button');lineTouchButton.textContent='線種・先端';lineTouchButton.onclick=openLineStyle;$('touchObjectActions').append(lineTouchButton);
+const lineMenuButton=document.createElement('button');lineMenuButton.textContent='線・背景・透明度を編集';lineMenuButton.setAttribute('role','menuitem');lineMenuButton.onclick=openLineStyle;$('objectMenu').append(lineMenuButton);
+const lineTouchButton=document.createElement('button');lineTouchButton.textContent='線・背景・透明度';lineTouchButton.onclick=openLineStyle;$('touchObjectActions').append(lineTouchButton);
 const oldShowMenu=showObjectMenu;showObjectMenu=function(...args){lineMenuButton.hidden=!selectedObjects().some(o=>lineTypes.includes(o.type));oldShowMenu(...args)};
 const oldSelectionUpdate=window.updateTouchSelection;window.updateTouchSelection=function(...args){oldSelectionUpdate?.(...args);lineTouchButton.hidden=!selectedObjects().some(o=>lineTypes.includes(o.type))};
 $('cancelLineStyle').onclick=()=>{lineDialog.close();lineTargets=null};lineDialog.addEventListener('cancel',()=>{lineTargets=null});
 $('applyLineStyle').onclick=()=>{
  if(pageBusy||rendering||!lineTargets||pageEntries[page-1]?.id!==linePage||lineTargets.some(o=>!list().includes(o)))return;
  const style=$('lineStyleChoice').value,first=$('startCapChoice').value,last=$('endCapChoice').value;
- const changes=lineTargets.filter(o=>style&&style!==(o.lineStyle||'solid')||o.type==='arrow'&&(first&&first!==(o.startCap||'none')||last&&last!==(o.endCap||'arrow')));
- if(changes.length){snapshot();for(const o of changes){if(style)o.lineStyle=style;if(o.type==='arrow'){if(first)o.startCap=first;if(last)o.endCap=last}}}
+ const alpha=$('objectOpacityChoice').value,fillAlpha=$('fillOpacityChoice').value;
+ if([alpha,fillAlpha].some(v=>v!==''&&(!Number.isFinite(Number(v))||Number(v)<0||Number(v)>100))){$('objectOpacityChoice').reportValidity();$('fillOpacityChoice').reportValidity();return}
+ const patches=lineTargets.map(o=>{const patch={};if(style)patch.lineStyle=style;if($('applyStrokeColor').checked)patch.color=$('strokeColorChoice').value;if(alpha!=='')patch.opacity=Number(alpha)/100;
+ if(['rect','ellipse'].includes(o.type)){const mode=$('fillModeChoice').value;if(mode==='none')patch.fillColor=null;else if(mode==='color')patch.fillColor=$('fillColorChoice').value;if(fillAlpha!=='')patch.fillOpacity=Number(fillAlpha)/100}
+ if(o.type==='arrow'){if(first)patch.startCap=first;if(last)patch.endCap=last}return{o,patch}}).filter(({o,patch})=>Object.keys(patch).some(k=>patch[k]!==o[k]));
+ if(patches.length){snapshot();for(const {o,patch}of patches)Object.assign(o,patch)}
  lineDialog.close();lineTargets=null;draw();
 };
+
+$('strokeColorChoice').oninput=()=>{$('applyStrokeColor').checked=true};$('fillColorChoice').oninput=()=>{$('fillModeChoice').value='color'};
