@@ -1,6 +1,6 @@
 /* Vector seals: frame and label are one editable annotation. */
-const stampBox=document.createElement('section');stampBox.id='stampBox';
-stampBox.innerHTML='<h2>指示スタンプ</h2><div class="stamp-buttons"></div><label>番号 <select id="stampNumber" aria-label="番号付き丸印"></select></label><button id="placeNumber">丸番号を配置</button>';
+const stampBox=document.createElement('details');stampBox.id='stampBox';
+stampBox.innerHTML='<summary>指示スタンプ</summary><div class="stamp-buttons"></div><label>番号 <select id="stampNumber" aria-label="番号付き丸印"></select></label><button id="placeNumber">丸番号を配置</button>';
 document.querySelector('aside').append(stampBox);
 function prepareStamp(text,number=false){if(pageBusy||rendering)return;if(mobileMedia.matches)setTouchMode('edit',false);stampPreset={text,shape:number?'circle':'rect',w:number?54:140,h:number?54:50};setTool('stamp');draw()}
 toolLabels.stamp='スタンプを配置';
