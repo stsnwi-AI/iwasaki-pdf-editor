@@ -57,12 +57,83 @@
 
 /* Hide filename and command text below the text composer. Internal nodes remain for save names and status updates. */
 .workspace .file-caption,.workspace #status{display:none!important}
-#stampBox{margin-top:12px;padding:10px;border-top:1px solid #ddd}#stampBox h2{font-size:14px}.stamp-buttons{display:grid;grid-template-columns:1fr 1fr;gap:6px}#stampBox button{min-height:44px}#stampBox label{display:inline-flex;gap:8px;margin:8px 0}#lineStyleDialog{width:min(420px,90vw);padding:22px;border:0;border-radius:14px}#lineStyleDialog::backdrop{background:#0006}#lineStyleDialog label{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0}#lineStyleDialog select{min-height:44px;max-width:230px}#lineStyleDialog button{min-height:44px}.line-dialog-actions{display:flex;justify-content:flex-end;gap:12px}#lineStyleDialog p{font-size:13px;color:#555}
+.stamp-buttons{display:grid;grid-template-columns:1fr 1fr;gap:6px}#stampBox button{min-height:44px}#stampBox label{display:inline-flex;gap:8px;margin:8px 0}#lineStyleDialog{width:min(420px,90vw);padding:22px;border:0;border-radius:14px}#lineStyleDialog::backdrop{background:#0006}#lineStyleDialog label{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0}#lineStyleDialog select{min-height:44px;max-width:230px}#lineStyleDialog button{min-height:44px}.line-dialog-actions{display:flex;justify-content:flex-end;gap:12px}#lineStyleDialog p{font-size:13px;color:#555}
 
-#stampBox .seal-preview{border:4px double #b83333;color:#b83333;background:#fffaf7;font-family:serif;font-weight:bold;letter-spacing:.14em;border-radius:3px;min-height:46px}#stampBox h2::after{content:"（枠付き）";font-size:11px;font-weight:normal}
+#stampBox .seal-preview{border:4px double #b83333;color:#b83333;background:#fffaf7;font-family:serif;font-weight:bold;letter-spacing:.14em;border-radius:3px;min-height:46px}
 
 #lineStyleDialog{max-height:85vh;overflow-y:auto}#lineStyleDialog input[type=number]{width:85px;min-height:40px}#lineStyleDialog input[type=color]{width:65px;min-height:40px}
 
 #lineStyleDialog label[hidden],#lineStyleDialog input[hidden]{display:none!important}
 
 #lineStyleDialog{box-sizing:border-box;max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);box-shadow:0 8px 35px #0005}#lineStyleDialog::backdrop{background:transparent}#lineStyleDialog h2{cursor:move;touch-action:none;user-select:none;position:sticky;top:-22px;background:#f2eef8;padding:14px;margin:-22px -22px 16px;font-size:17px;border-bottom:1px solid #d7cbe8}#lineStyleDialog h2:focus-visible{outline:2px solid #705398;outline-offset:-3px}
+
+
+#stampBox {
+  margin-top: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+#stampBox > summary {
+  padding: 9px 10px;
+  color: var(--purple);
+  font-weight: 700;
+  cursor: pointer;
+}
+#stampBox[open] { padding: 0 8px 8px; }
+#stampBox[open] > summary { padding-inline: 2px; }
+
+@media (min-width: 1025px) and (pointer: fine) {
+  main > aside { width: 208px; padding: 10px 9px; }
+  aside > #togglePages, aside > #undo {
+    display: inline-flex;
+    justify-content: center;
+    width: calc(50% - 3px);
+    min-height: 36px;
+    margin: 0 0 8px;
+    padding: 5px 3px;
+    gap: 4px;
+    font-size: 12px;
+  }
+  aside > #togglePages { margin-right: 6px; }
+  aside > #togglePages .ui-icon, aside > #undo .ui-icon {
+    width: 16px;
+    height: 16px;
+  }
+  #annotationTools > h2 { margin-bottom: 6px; }
+  #tools { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+  #tools button {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 38px;
+    padding: 4px;
+    gap: 4px;
+    border-radius: 8px;
+    font-size: 11px;
+  }
+  #tools .ui-icon { box-sizing: border-box; width: 20px; height: 20px; padding: 2px; }
+  #tools button.active::after { top: 3px; right: 3px; width: 5px; height: 5px; }
+  #annotationTools > h3 { margin: 8px 0 4px; }
+  .palette { gap: 4px; margin: 4px 0 8px; }
+  .swatch { width: 24px; height: 24px; }
+  .text-size-stepper { gap: 4px; }
+  .text-size-stepper button, .text-size-stepper input { min-height: 36px; }
+  .text-size-stepper button { flex-basis: 36px; padding: 4px; }
+  .text-style-controls { grid-template-columns: minmax(0, 1fr) 46px 46px; margin: 8px 0; }
+  .text-style-controls select, .text-style-buttons button { min-height: 36px; }
+  .text-style-buttons button { width: 46px; }
+  #editor { margin: 8px 0; padding: 8px; }
+  #stampBox .seal-preview, #stampBox #placeNumber { padding-inline: 6px; font-size: 12px; }
+}
+
+@media (max-width: 1024px), (pointer: coarse) {
+  #stampBox > summary { min-height: 44px; padding-block: 12px; }
+}
+@media (max-width: 1024px) {
+  .mobile-tools-open #tools button {
+    min-width: 72px;
+    min-height: 44px;
+    padding: 5px 6px;
+    gap: 3px;
+  }
+}
